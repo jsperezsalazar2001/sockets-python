@@ -66,12 +66,37 @@ def threaded(client_connection, client_address, route):
                 response = '650 DBF\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.UPLOAD):
-            origin_directory = remote_command[1]
-            destination = remote_command[2]
+# origin_directory = remote_command[1]
+#             destination = remote_command[2]
+#             destination = "\\" + destination
+#             shutil.copy2(origin_directory,route+destination)
+#             response = '700 UFBS\n'
+#             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
+            
+            destination = remote_command[1]
             destination = "\\" + destination
-            shutil.copy2(origin_directory,route+destination)
-            response = '700 UFTBS\n'
-            client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
+            file_name = remote_command[2]
+            file_size = remote_command[3]
+            try:
+                f = open(route+destination+'\\'+file_name,'wb')
+                if file_size is not "0":
+                    print("Receiving file...")                
+                    l = client_connection.recv(1024)
+                    total = len(l)
+                    while(len(l)>0):
+                        f.write(l)
+                        if (str(total) != file_size):
+                            l = client_connection.recv(1024)
+                            total = total + len(l)
+                        else:
+                            break
+                f.close()
+                response = '700 UFTBS\n'
+                client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
+            except BaseException as e:
+                print("ERROR: " + str(e))  
+                response = '750 UFTBF\n'
+                client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.LIST_F):
             dic = {} 
             for dirName, subdirList, fileList in os.walk(route):
