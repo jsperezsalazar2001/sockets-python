@@ -12,7 +12,7 @@ import constants
 import os
 import sys
 import shutil
-
+import time
 # import thread module 
 import threading 
 
@@ -24,12 +24,19 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def threaded(client_connection, client_address, route):
     while True:
-        data_received = client_connection.recv(constants.RECV_BUFFER_SIZE)
-        remote_string = str(data_received.decode(constants.ENCODING_FORMAT))
-        remote_command = remote_string.split()
-        command = remote_command[0]
-        print(f'Data received from: {client_address[0]}:{client_address[1]}')
-        print(command)
+        try:
+            data_received = client_connection.recv(constants.RECV_BUFFER_SIZE)
+            remote_string = str(data_received.decode(constants.ENCODING_FORMAT))
+            remote_command = remote_string.split()
+            command = remote_command[0]
+            print(f'Data received from: {client_address[0]}:{client_address[1]}')
+            print(command)
+        except BaseException:
+            try:
+                response = constants.ERROR_DATA
+                client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
+            except BaseException:
+                print(f'Lossed connection to: {client_address[0]}:{client_address[1]}')
         if(command == constants.INIT):
             response = '100 OK\n'
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
@@ -72,13 +79,6 @@ def threaded(client_connection, client_address, route):
                 response = '650 BDF\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.UPLOAD):
-# origin_directory = remote_command[1]
-#             destination = remote_command[2]
-#             destination = "\\" + destination
-#             shutil.copy2(origin_directory,route+destination)
-#             response = '700 UFBS\n'
-#             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
-            
             destination = remote_command[1]
             destination = "\\" + destination
             file_name = remote_command[2]
@@ -97,6 +97,7 @@ def threaded(client_connection, client_address, route):
                         else:
                             break
                 f.close()
+                print("File received successfully.")  
                 response = '700 FUTBS\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
             except BaseException as e:
@@ -116,10 +117,24 @@ def threaded(client_connection, client_address, route):
         elif (command == constants.DOWNLOAD):
             origin_bucket = remote_command[1]
             file_name = remote_command[2]
-            destination = remote_command[3]
-            origin_bucket = "\\" + origin_bucket + "\\" + file_name
-            shutil.copy2(route + origin_bucket,destination)
-            response = '900 FDFBS\n'
+            origin_file_path = route + '\\' + origin_bucket + '\\' + file_name
+            origin_file_path = origin_file_path.replace("\\", '/')
+            print(origin_file_path)
+            try:
+                file_size = str(os.path.getsize(origin_file_path))
+                client_connection.send(bytes(file_size, constants.ENCODING_FORMAT))
+                time.sleep(1)
+                f = open(origin_file_path,'rb')
+                l = f.read(1024)
+                while (l):
+                    client_connection.send(l)
+                    l = f.read(1024)
+                f.close()
+                print("finished sending")
+                response = '900 FDFBS\n'
+            except BaseException as e:
+                print("ERROR: " + str(e)) 
+                response = '900 FDFBF\n'
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif (command == constants.DELETE_F):
             try:

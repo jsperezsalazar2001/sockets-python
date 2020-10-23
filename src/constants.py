@@ -49,3 +49,4 @@ CODE_R_STR = ("-> 300 BCS : Stands for Bucket Created Successfully.\n"
               "-> 900 FDFBS : Stands for File Downloaded From Bucket Successfully.\n"
               "-> 1000 FDS : Stands for File Deleted Successfully.\n"
               "-> 1050 FDF : Stands for File Deletion Fails.\n")
+ERROR_DATA = "There is an error in the given data."

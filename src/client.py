@@ -64,10 +64,8 @@ def main():
         elif(command_to_send==constants.UPLOAD):
             try:
                 origin_directory = input("Path of the directory of the file: ")
-                # if origin_directory[-1] is not '"':
-                #     origin_directory += '"'
-                # if origin_directory [0] is not '"':
-                #     origin_directory = '"' + origin_directory
+                if origin_directory[-1] == '"' and origin_directory[0] == '"':
+                    origin_directory = origin_directory[1:-1]
                 bucket = input("Name of the destination bucket: ")
                 file_name = input("What would you like the file to be saved as? (with extension): ")
                 file_size = str(os.path.getsize(origin_directory))
@@ -85,8 +83,8 @@ def main():
                 data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
                 print(data_received.decode(constants.ENCODING_FORMAT))
                 command_to_send = input()
-            except FileNotFoundError:
-                print('The path given is not valid')
+            except BaseException as e:
+                print("ERROR: " + str(e)) 
                 command_to_send = input()
         elif(command_to_send==constants.LIST_F):
             command_and_data_to_send = command_to_send
@@ -104,10 +102,28 @@ def main():
             origin_bucket = input("Name of the origin bucket: ")
             file_name = input("Name of the file: ")
             destination = input("Path of the destination: ")
-            command_and_data_to_send = command_to_send + ' ' + origin_bucket + ' ' + file_name +' '+ destination
+            command_and_data_to_send = command_to_send + ' ' + origin_bucket + ' ' + file_name
             client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
-            print(data_received.decode(constants.ENCODING_FORMAT))
+            file_size = data_received.decode(constants.ENCODING_FORMAT)
+
+            try:
+                f = open(destination+'\\'+file_name,'wb')
+                if file_size is not "0":
+                    print("Receiving file...")                
+                    l = client_socket.recv(1024)
+                    total = len(l)
+                    while(len(l)>0):
+                        f.write(l)
+                        if (str(total) != file_size):
+                            l = client_socket.recv(1024)
+                            total = total + len(l)
+                        else:
+                            break
+                f.close()
+                print("File received...") 
+            except BaseException as e:
+                print("ERROR: " + str(e))  
             command_to_send = input()
         elif (command_to_send == constants.DELETE_F):
             bucket = input("Name of the bucket where you would like to delete a file: ")
