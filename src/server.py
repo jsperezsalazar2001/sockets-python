@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mond Oct 12 2020
-
 @author: Yhoan Alejandro Guzman, Juan Sebastian Perez
 """
 
@@ -28,15 +27,18 @@ def threaded(client_connection, client_address, route):
             data_received = client_connection.recv(constants.RECV_BUFFER_SIZE)
             remote_string = str(data_received.decode(constants.ENCODING_FORMAT))
             remote_command = remote_string.split()
+            if len(remote_command) == 0:
+                continue
             command = remote_command[0]
             print(f'Data received from: {client_address[0]}:{client_address[1]}')
-            print(command)
-        except BaseException:
+        except BaseException as e:
+            print("ERROR: " + str(e))
             try:
                 response = constants.ERROR_DATA
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
             except BaseException:
                 print(f'Lossed connection to: {client_address[0]}:{client_address[1]}')
+                sys.exit()
         if(command == constants.INIT):
             response = '100 OK\n'
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
@@ -78,7 +80,12 @@ def threaded(client_connection, client_address, route):
                 print("ERROR: " + str(e))
                 response = '650 BDF\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
+        elif(command == constants.UPLOADING):
+            pass
         elif(command == constants.UPLOAD):
+            command = "uploading"
+            print(remote_command)
+            print(f'Data received from: {client_address[0]}:{client_address[1]}')
             destination = remote_command[1]
             destination = "\\" + destination
             file_name = remote_command[2]
