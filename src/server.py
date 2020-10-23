@@ -38,6 +38,12 @@ def threaded(client_connection, client_address, route):
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
             print(f'Now, client {client_address[0]}:{client_address[1]} is disconnected.')
             break
+        elif(command == constants.HELP):
+            response = constants.HELP_STR
+            client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
+        elif(command == constants.CODE_R):
+            response = constants.CODE_R_STR
+            client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.CREATE_B):
             try:
                 name = remote_command[1]
@@ -51,7 +57,7 @@ def threaded(client_connection, client_address, route):
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.LIST_B):
             bucket_list = os.listdir(route)
-            bucket_list.append("500 LS")
+            bucket_list.append("500 BLS")
             response = str(bucket_list)
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.DELETE_B):
@@ -59,11 +65,11 @@ def threaded(client_connection, client_address, route):
                 name = remote_command[1]
                 name = "\\" + name
                 shutil.rmtree(route+name)
-                response = '600 DBS\n'
+                response = '600 BDS\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
             except BaseException as e:
                 print("ERROR: " + str(e))
-                response = '650 DBF\n'
+                response = '650 BDF\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.UPLOAD):
 # origin_directory = remote_command[1]
@@ -91,11 +97,11 @@ def threaded(client_connection, client_address, route):
                         else:
                             break
                 f.close()
-                response = '700 UFTBS\n'
+                response = '700 FUTBS\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
             except BaseException as e:
                 print("ERROR: " + str(e))  
-                response = '750 UFTBF\n'
+                response = '750 FUTBF\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.LIST_F):
             dic = {} 
@@ -104,7 +110,7 @@ def threaded(client_connection, client_address, route):
                 for fname in fileList:
                     array.append(fname)
                 dic[dirName] = array
-            dic['response'] = '800 LFS\n'
+            dic['response'] = '800 FLS\n'
             response = str(dic)
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif (command == constants.DOWNLOAD):
@@ -113,7 +119,7 @@ def threaded(client_connection, client_address, route):
             destination = remote_command[3]
             origin_bucket = "\\" + origin_bucket + "\\" + file_name
             shutil.copy2(route + origin_bucket,destination)
-            response = '900 DFS\n'
+            response = '900 FDFBS\n'
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif (command == constants.DELETE_F):
             try:
@@ -121,14 +127,14 @@ def threaded(client_connection, client_address, route):
                 file_name = remote_command[2]
                 name = "\\" + bucket + "\\" + file_name
                 os.remove(route + name)
-                response = '1000 DFS\n'
+                response = '1000 FDS\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
             except BaseException as e:
                 print("ERROR: " + str(e))
-                response = '1050 DFF\n'
+                response = '1050 FDF\n'
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         else:
-            response = '400 BCMD\n\rCommand-Description: Bad command\n\r'
+            response = '400 BCMD\n'
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
     try:
         print_lock.release()
