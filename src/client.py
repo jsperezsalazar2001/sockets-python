@@ -9,6 +9,8 @@ import socket
 import constants
 import ast
 import json 
+import time
+import os
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 bucket_route = ""
@@ -59,15 +61,34 @@ def main():
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             print(data_received.decode(constants.ENCODING_FORMAT))
             command_to_send = input()
-        elif(command_to_send == constants.UPLOAD):
-            origin_directory = input("Path of the directory of the file: ")
-            bucket = input("Name of the destination bucket: ")
-            command_and_data_to_send = command_to_send + ' ' + origin_directory + ' ' + bucket
-            client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
-            data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
-            print(data_received.decode(constants.ENCODING_FORMAT))
-            command_to_send = input()
-        elif(command_to_send == constants.LIST_F):
+        elif(command_to_send==constants.UPLOAD):
+            try:
+                origin_directory = input("Path of the directory of the file: ")
+                # if origin_directory[-1] is not '"':
+                #     origin_directory += '"'
+                # if origin_directory [0] is not '"':
+                #     origin_directory = '"' + origin_directory
+                bucket = input("Name of the destination bucket: ")
+                file_name = input("What would you like the file to be saved as? (with extension): ")
+                file_size = str(os.path.getsize(origin_directory))
+                command_and_data_to_send = command_to_send + ' ' + bucket + ' ' + file_name + ' ' + file_size
+                client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
+                time.sleep(1)
+                origin_directory = origin_directory.replace("\\", '/')
+                f = open(origin_directory,'rb')
+                l = f.read(1024)
+                while (l):
+                    client_socket.send(l)
+                    l = f.read(1024)
+                f.close()
+                print("finished sending")
+                data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
+                print(data_received.decode(constants.ENCODING_FORMAT))
+                command_to_send = input()
+            except FileNotFoundError:
+                print('The path given is not valid')
+                command_to_send = input()
+        elif(command_to_send==constants.LIST_F):
             command_and_data_to_send = command_to_send
             client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
