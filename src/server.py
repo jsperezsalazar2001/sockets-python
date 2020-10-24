@@ -27,8 +27,8 @@ def threaded(client_connection, client_address, route):
             data_received = client_connection.recv(constants.RECV_BUFFER_SIZE)
             remote_string = str(data_received.decode(constants.ENCODING_FORMAT))
             remote_command = remote_string.split()
-            if len(remote_command) == 0:
-                continue
+            # if len(remote_command) == 0:
+            #     continue
             command = remote_command[0]
             print(f'Data received from: {client_address[0]}:{client_address[1]}')
         except BaseException as e:
@@ -38,7 +38,7 @@ def threaded(client_connection, client_address, route):
                 client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
             except BaseException:
                 print(f'Lossed connection to: {client_address[0]}:{client_address[1]}')
-                sys.exit()
+                sys.exit("1")
         if(command == constants.INIT):
             response = '100 OK\n'
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
@@ -92,7 +92,7 @@ def threaded(client_connection, client_address, route):
             file_size = remote_command[3]
             try:
                 f = open(route+destination+'\\'+file_name,'wb')
-                if file_size is not "0":
+                if file_size != "0":
                     print("Receiving file...")                
                     l = client_connection.recv(1024)
                     total = len(l)
@@ -122,6 +122,7 @@ def threaded(client_connection, client_address, route):
             response = str(dic)
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif (command == constants.DOWNLOAD):
+            print("entra download")
             origin_bucket = remote_command[1]
             file_name = remote_command[2]
             origin_file_path = route + '\\' + origin_bucket + '\\' + file_name

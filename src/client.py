@@ -13,7 +13,7 @@ import json
 import time
 import os
 import threading 
-
+import sys
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 bucket_route = ""
 def upload(origin_directory, command_and_data_to_send):
@@ -35,6 +35,36 @@ def upload(origin_directory, command_and_data_to_send):
     data_received = new_client_socket.recv(constants.RECV_BUFFER_SIZE)
     print(data_received.decode(constants.ENCODING_FORMAT))
     new_client_socket.close()
+    sys.exit()
+
+def download(command_and_data_to_send, destination, file_name):
+    new_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    new_client_socket.connect(("127.0.0.1", constants.PORT)) 
+    new_client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
+    data_received = new_client_socket.recv(constants.RECV_BUFFER_SIZE)
+    file_size = data_received.decode(constants.ENCODING_FORMAT)
+
+    try:
+        f = open(destination+'\\'+file_name,'wb')
+        if file_size is not "0":
+            print("Receiving file...")                
+            l = new_client_socket.recv(1024)
+            total = len(l)
+            while(len(l)>0):
+                f.write(l)
+                if (str(total) != file_size):
+                    l = new_client_socket.recv(1024)
+                    total = total + len(l)
+                else:
+                    break
+        f.close()
+    except BaseException as e:
+        print("ERROR: " + str(e))  
+    print("File received") 
+    data_received = new_client_socket.recv(constants.RECV_BUFFER_SIZE)
+    print(data_received.decode(constants.ENCODING_FORMAT))
+    new_client_socket.close()
+    sys.exit()
 
 def main():
     print("*"*40)
@@ -114,27 +144,7 @@ def main():
             file_name = input("Name of the file: ")
             destination = input("Path of the destination: ")
             command_and_data_to_send = command_to_send + ' ' + origin_bucket + ' ' + file_name
-            client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
-            data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
-            file_size = data_received.decode(constants.ENCODING_FORMAT)
-
-            try:
-                f = open(destination+'\\'+file_name,'wb')
-                if file_size is not "0":
-                    print("Receiving file...")                
-                    l = client_socket.recv(1024)
-                    total = len(l)
-                    while(len(l)>0):
-                        f.write(l)
-                        if (str(total) != file_size):
-                            l = client_socket.recv(1024)
-                            total = total + len(l)
-                        else:
-                            break
-                f.close()
-                print("File received...") 
-            except BaseException as e:
-                print("ERROR: " + str(e))  
+            _thread.start_new_thread(download, (command_and_data_to_send, destination, file_name))
             command_to_send = input()
         elif (command_to_send == constants.DELETE_F):
             bucket = input("Name of the bucket where you would like to delete a file: ")
