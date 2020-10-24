@@ -22,6 +22,7 @@ bucket_route = ""
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def threaded(client_connection, client_address, route):
+    command = ""
     while True:
         try:
             data_received = client_connection.recv(constants.RECV_BUFFER_SIZE)
@@ -29,6 +30,11 @@ def threaded(client_connection, client_address, route):
             remote_command = remote_string.split()
             # if len(remote_command) == 0:
             #     continue
+            if len(remote_command) == 0 and (command == constants.DOWNLOAD or command == constants.UPLOAD ):
+                break
+            if len(remote_command) == 0:
+                print(f'Lossed connection to: {client_address[0]}:{client_address[1]}')
+                break
             command = remote_command[0]
             print(f'Data received from: {client_address[0]}:{client_address[1]}')
         except BaseException as e:
@@ -66,8 +72,11 @@ def threaded(client_connection, client_address, route):
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.LIST_B):
             bucket_list = os.listdir(route)
-            bucket_list.append("500 BLS")
-            response = str(bucket_list)
+            response_str = ""
+            for b_name in bucket_list:
+                response_str += "-> " + str(b_name) + " \n"
+            response_str += "500 BLS\n"
+            response = response_str
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif(command == constants.DELETE_B):
             try:
@@ -122,7 +131,6 @@ def threaded(client_connection, client_address, route):
             response = str(dic)
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif (command == constants.DOWNLOAD):
-            print("entra download")
             origin_bucket = remote_command[1]
             file_name = remote_command[2]
             origin_file_path = route + '\\' + origin_bucket + '\\' + file_name
@@ -142,7 +150,7 @@ def threaded(client_connection, client_address, route):
                 response = '900 FDFBS\n'
             except BaseException as e:
                 print("ERROR: " + str(e)) 
-                response = '900 FDFBF\n'
+                response = '950 FDFBF\n'
             client_connection.sendall(response.encode(constants.ENCODING_FORMAT))
         elif (command == constants.DELETE_F):
             try:

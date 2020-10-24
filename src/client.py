@@ -79,43 +79,34 @@ def main():
     while  command_to_send != constants.QUIT:
         if command_to_send == '':
             print("Please input a valid command...")
-            command_to_send = input()
         elif(command_to_send == constants.HELP):
             client_socket.send(bytes(command_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             print(data_received.decode(constants.ENCODING_FORMAT))
-            command_to_send = input()
         elif(command_to_send == constants.CODE_R):
             client_socket.send(bytes(command_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             print(data_received.decode(constants.ENCODING_FORMAT))
-            command_to_send = input()
         elif(command_to_send == constants.CREATE_B):
             data_to_send = input("Name of the bucket: ")
             command_and_data_to_send = command_to_send + ' ' + data_to_send 
             client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             print(data_received.decode(constants.ENCODING_FORMAT))
-            command_to_send = input()
         elif(command_to_send == constants.LIST_B):
             command_and_data_to_send = command_to_send
             client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
-            bucket_list = ast.literal_eval(data_received.decode(constants.ENCODING_FORMAT))
-            print(bucket_list[:-1])
-            print(bucket_list[-1])
-            command_to_send = input()
+            print(data_received.decode(constants.ENCODING_FORMAT))
         elif(command_to_send == constants.DELETE_B):
             data_to_send = input("Name of the bucket that you would like to delete: ")
             command_and_data_to_send = command_to_send + ' ' + data_to_send 
             client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             print(data_received.decode(constants.ENCODING_FORMAT))
-            command_to_send = input()
         elif(command_to_send==constants.UPLOAD):
-            print("entra upload")
             try:
-                origin_directory = input("Path of the directory of the file: ")
+                origin_directory = input("Path of the file: ")
                 if origin_directory[-1] == '"' and origin_directory[0] == '"':
                     origin_directory = origin_directory[1:-1]
                 bucket = input("Name of the destination bucket: ")
@@ -126,7 +117,6 @@ def main():
                 command_to_send = input()
             except BaseException as e:
                 print("ERROR: " + str(e)) 
-                command_to_send = input()
         elif(command_to_send==constants.LIST_F):
             command_and_data_to_send = command_to_send
             client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
@@ -134,18 +124,19 @@ def main():
             data_received = str(data_received.decode(constants.ENCODING_FORMAT)).replace("'", '"').replace("\\\\", '/')
             file_list = json.loads(str(data_received))
             for key in file_list:
-                if (key != "response"):
-                    print(key)
-                    print("----> "+str(file_list[key]))
+                if (key != "response") and (len(file_list[key]) > 0):
+                    print("Path: " + str(key))
+                    print("Files --> "+str(file_list[key]))
+                elif (len(file_list[key]) == 0):
+                    print("Path: " + str(key))
+                    print("Files --> There are no files.")
             print(file_list["response"])
-            command_to_send = input()
         elif (command_to_send == constants.DOWNLOAD):
             origin_bucket = input("Name of the origin bucket: ")
             file_name = input("Name of the file: ")
             destination = input("Path of the destination: ")
             command_and_data_to_send = command_to_send + ' ' + origin_bucket + ' ' + file_name
             _thread.start_new_thread(download, (command_and_data_to_send, destination, file_name))
-            command_to_send = input()
         elif (command_to_send == constants.DELETE_F):
             bucket = input("Name of the bucket where you would like to delete a file: ")
             file_name = input("Name of the file: ")
@@ -153,12 +144,14 @@ def main():
             client_socket.send(bytes(command_and_data_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             print(data_received.decode(constants.ENCODING_FORMAT))
-            command_to_send = input()
         else:
             client_socket.send(bytes(command_to_send, constants.ENCODING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             print(data_received.decode(constants.ENCODING_FORMAT))
+        try:
             command_to_send = input()
+        except BaseException:
+            break
     
     client_socket.send(bytes(command_to_send, constants.ENCODING_FORMAT))
     data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)

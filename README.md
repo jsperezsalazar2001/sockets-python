@@ -66,11 +66,15 @@ Sockets and the socket API are used to send messages across a network. They prov
 
 **650 BDF**  Stands for _Bucket Deletion Fails._
 
-**700 FUTB** Stands for _File Uploaded To Bucket Successfully._
+**700 FUTBS** Stands for _File Uploaded To Bucket Successfully._
+
+**750 FUTBF** Stands for _File Upload To Bucket Fails._
 
 **800 FLS**  Stands for _Files Listed Successfully._
 
 **900 FDFBS**  Stands for _File Downloaded From Bucket Successfully._
+
+**950 FDFBF**  Stands for _File Download From Bucket Fails._
 
 **1000 FDS**  Stands for _File Deleted Successfully._
 
