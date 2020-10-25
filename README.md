@@ -6,10 +6,10 @@ _This projects use sockets in python to stablish a communication between a serve
 
 Sockets and the socket API are used to send messages across a network. They provide a form of inter-process communication (IPC). The network can be a logical, local network to the computer, or one that’s physically connected to an external network, with its own connections to other networks.
 
-## Members ??
+## Members :chess_pawn:
 
-- Juan Sebasti?n P?rez Salazar
-- Yhoan Alejandro Guzm?n Garc?a
+- Juan Sebastian Perez Salazar
+- Yhoan Alejandro Guzman Garcia
 
 ## Messages vocabulary 📖
 
@@ -84,11 +84,11 @@ Sockets and the socket API are used to send messages across a network. They prov
 
 **1050 FDF**  Stands for _File Deletion Fails._
 
-## Instructions to run the code ??
+## Instructions to run the code :gear:
 
 _to start the server application you must put the path where the buckets will be saved in quotes._
 
-## Repository link ??
+## Repository link :link:
 
 [Sockets-Python](https://github.com/jsperezsalazar2001/sockets-python)
 
