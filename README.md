@@ -2,7 +2,7 @@
 
 ## Description 📄
 
-_This projects use sockets in python to stablish a communication between a server socket and a client socket._
+_This project uses sockets in python to stablish a communication between a server socket and a client socket._
 
 Sockets and the socket API are used to send messages across a network. They provide a form of inter-process communication (IPC). The network can be a logical, local network to the computer, or one that’s physically connected to an external network, with its own connections to other networks.
 
