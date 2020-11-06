@@ -39,7 +39,10 @@ Sockets and the socket API are used to send messages across a network. They prov
 
 **sintax:** 
 
-```upload <path of the file> <name of file> <name of bucket>```
+```upload 
+<path of the file> 
+<name of bucket> 
+<name of file>```
 
 **delete_f:** Use it to _delete a file from the defined bucket._
 
@@ -53,7 +56,10 @@ Sockets and the socket API are used to send messages across a network. They prov
 
 **sintax:** 
 
-```download <name of bucket> <name of file> <path of destination>```
+```download 
+<name of bucket> 
+<name of file> 
+<path of destination>```
 
 
 ### Code response meaning 📓
